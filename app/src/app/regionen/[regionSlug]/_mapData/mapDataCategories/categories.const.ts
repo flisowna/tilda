@@ -1,4 +1,5 @@
 import { subcat_accidents } from '../mapDataSubcategories/subcat_accidents.const'
+import { subcat_bicycleAccidents } from '../mapDataSubcategories/subcat_bicycleAccidents.const'
 import { subcat_bicycleParking } from '../mapDataSubcategories/subcat_bicycleParking'
 import { subcat_bikelanes } from '../mapDataSubcategories/subcat_bikelanes.const'
 import { subcat_bikelanesStatistics } from '../mapDataSubcategories/subcat_bikelanesStatistics.const'
@@ -164,6 +165,12 @@ export const categories: StaticMapDataCategory[] = [
     name: 'Unfallatlas',
     desc: 'Unfalldaten',
     subcategories: [{ ...subcat_accidents, defaultStyle: 'default' }],
+  },
+  {
+    id: 'bicycleAccidents',
+    name: 'Fahrradunfälle',
+    desc: 'Unfälle mit Fahrradbeteiligung (Unfallatlas)',
+    subcategories: [{ ...subcat_bicycleAccidents, defaultStyle: 'default' }],
   },
   ...radinfraCategories,
   ...parkingTildaCategories,

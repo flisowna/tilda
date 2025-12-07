@@ -3,6 +3,10 @@ import {
   SubcatAccidentsStyleIds,
 } from './mapDataSubcategories/subcat_accidents.const'
 import {
+  SubcatBicycleAccidentsId,
+  SubcatBicycleAccidentsStyleIds,
+} from './mapDataSubcategories/subcat_bicycleAccidents.const'
+import {
   SubcatBicycleParkingId,
   SubcatBicycleParkingStyleIds,
 } from './mapDataSubcategories/subcat_bicycleParking'
@@ -166,6 +170,7 @@ import { StaticMapDataCategory } from './types'
 
 export type SubcategoryId =
   | SubcatAccidentsId
+  | SubcatBicycleAccidentsId
   | SubcatBicycleParkingId
   | SubcatBikelanesId
   | SubcatBikelanesPlusBikeSuitabilityId
@@ -217,6 +222,7 @@ type StyleIdDefaults = StaticMapDataCategory['subcategories'][number]['defaultSt
 export type StyleId =
   | StyleIdDefaults
   | SubcatAccidentsStyleIds
+  | SubcatBicycleAccidentsStyleIds
   | SubcatBicycleParkingStyleIds
   | SubcatBikelanesPlusBikeSuitabilityStyleIds
   | SubcatBikelanesPlusPresenceStyleIds

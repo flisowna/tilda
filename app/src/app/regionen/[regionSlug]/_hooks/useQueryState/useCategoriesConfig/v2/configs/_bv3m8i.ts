@@ -117,4 +117,19 @@ export const _bv3m8i: MapDataCategoryParam[] = [
       },
     ],
   },
+  {
+    id: 'bicycleAccidents',
+    active: false,
+    subcategories: [
+      {
+        id: 'bicycleAccidents',
+        styles: [
+          { id: 'fatal', active: true }, // All severity categories active by default
+          { id: 'serious', active: true },
+          { id: 'light', active: true },
+          { id: 'heatmap', active: false },
+        ],
+      },
+    ],
+  },
 ]

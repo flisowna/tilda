@@ -299,6 +299,21 @@ export const _1xgd8y8: MapDataCategoryParam[] = [
     ],
   },
   {
+    id: 'bicycleAccidents',
+    active: false,
+    subcategories: [
+      {
+        id: 'bicycleAccidents',
+        styles: [
+          { id: 'fatal', active: true }, // All severity categories active by default
+          { id: 'serious', active: true },
+          { id: 'light', active: true },
+          { id: 'heatmap', active: false },
+        ],
+      },
+    ],
+  },
+  {
     id: 'radinfra_bikelanes',
     active: false,
     subcategories: [
