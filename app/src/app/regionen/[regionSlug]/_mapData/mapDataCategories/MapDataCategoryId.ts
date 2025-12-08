@@ -19,6 +19,7 @@ export type MapDataCategoryId =
   // Special only:
   | 'mapillary'
   | 'accidents'
+  | 'bicycleAccidents'
   | 'trafficSigns'
   // Special radinfra.de categories
   | 'radinfra_currentness'

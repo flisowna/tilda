@@ -46,6 +46,11 @@ const SourcesLayersAtlasGeoMemoized = memo(function SourcesLayersAtlasGeoMemoize
           <Fragment key={categoryConfig.id}>
             {/* ========== subcategories ========== */}
             {categoryConfig.subcategories.map((subcategoryConfig) => {
+              // Skip bicycle accidents - handled separately by SourcesLayersBicycleAccidents
+              if (subcategoryConfig?.sourceId === 'bicycle_accidents_umap') {
+                return null
+              }
+              
               const sourceData = getSourceData(subcategoryConfig?.sourceId)
 
               // One source can be used by multipe subcategories, so we need to make the key source-category-specific.

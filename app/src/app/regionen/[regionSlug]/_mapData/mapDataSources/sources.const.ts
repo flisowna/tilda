@@ -36,6 +36,7 @@ export type SourcesId =
   | AtlasSourceId
   | MapillarySourceId
   | 'accidents_unfallatlas'
+  | 'bicycle_accidents_umap'
 
 export const sources: MapDataSource<SourcesId>[] = [
   ...sourcesParkingLars,
@@ -105,8 +106,48 @@ export const sources: MapDataSource<SourcesId>[] = [
     inspector: {
       enabled: true,
       highlightingKey: 'unfall_id',
+      documentedKeys: [
+        'Unfallbeteiligte',
+        'UJAHR',
+        'UMONAT',
+        'UTAG',
+        'USTUNDE',
+        'unfall_id',
+        'Unfallkate',
+        'Unfallort',
+        'Unfalltyp',
+        'Verletzungsgrad',
+      ],
     },
     // presence: { enabled: false },
+    calculator: { enabled: false },
+  },
+  {
+    id: 'bicycle_accidents_umap',
+    // This is a GeoJSON source loaded dynamically via SourcesLayersBicycleAccidents component
+    // The tiles URL is a placeholder - actual data comes from /api/bicycle-accidents
+    tiles: '', // Not used - data loaded via GeoJSON source in component
+    minzoom: SIMPLIFY_MIN_ZOOM,
+    maxzoom: 16,
+    attributionHtml: 'uMap Berlin Unfallkarte / Changing Cities',
+    licence: undefined,
+    promoteId: undefined,
+    osmIdConfig: { osmTypeId: 'id' },
+    inspector: {
+      enabled: true,
+      highlightingKey: 'unfall_id',
+      documentedKeys: [
+        'Unfallbeteiligte',
+        'UJAHR',
+        'Wochentag',
+        'Uhrzeit',
+        'VERLETZUNGSGRAD',
+        'Unfallart',
+        'Unfalltyp',
+        'unfall_id',
+        'Unfallkate',
+      ],
+    },
     calculator: { enabled: false },
   },
   {

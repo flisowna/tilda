@@ -25,7 +25,10 @@ import { useRegionDatasets } from '../../_hooks/useRegionDatasets/useRegionDatas
 import { interactivityConfiguration } from '../../_mapData/mapDataSources/generalization/interacitvityConfiguartion'
 import { useStaticRegion } from '../regionUtils/useStaticRegion'
 import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspectorFeatureKey'
-import { isSourceKeyAtlasGeo } from '../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
+import {
+  createSourceKeyAtlasGeo,
+  isSourceKeyAtlasGeo,
+} from '../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { Calculator } from './Calculator/Calculator'
 import { QaZoomNotice } from './QaZoomNotice'
@@ -33,10 +36,10 @@ import { Search } from './Search/Search'
 
 import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
 import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
+import { SourcesLayersBicycleAccidents } from './SourcesAndLayers/SourcesLayersBicycleAccidents'
 import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
 import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
 import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
-import { SourcesLayersRegionMask } from './SourcesAndLayers/SourcesLayersRegionMask'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
 import { UpdateFeatureState } from './UpdateFeatureState'
 import { useInteractiveLayers } from './utils/useInteractiveLayers'
@@ -102,7 +105,32 @@ export const Map = () => {
     }
 
     const interactiveFeatures = extractInteractiveFeatures(mapParam, features)
-    const uniqueFeatures = uniqBy(interactiveFeatures, (f) => createInspectorFeatureKey(f))
+
+    // Fix source property for bicycle accidents GeoJSON source
+    // MapLibre sets feature.source to the source ID, but we need the source key format
+    const featuresWithFixedSource = interactiveFeatures.map((feature) => {
+      // Check if this is a bicycle accident feature
+      if (
+        feature.source === 'bicycle_accidents_umap' ||
+        feature.layer?.id?.includes('bicycle_accidents_umap')
+      ) {
+        // Create the proper source key format: cat:bicycleAccidents--source:bicycle_accidents_umap--subcat:bicycleAccidents
+        const sourceKey = createSourceKeyAtlasGeo(
+          'bicycleAccidents',
+          'bicycle_accidents_umap',
+          'bicycleAccidents',
+        )
+        // Ensure geometry is preserved
+        return {
+          ...feature,
+          source: sourceKey,
+          geometry: feature.geometry || (feature as any)._geometry,
+        } as MapGeoJSONFeature
+      }
+      return feature
+    })
+
+    const uniqueFeatures = uniqBy(featuresWithFixedSource, (f) => createInspectorFeatureKey(f))
 
     if (uniqueFeatures) {
       let newInspectorFeatures: MapGeoJSONFeature[] = []
@@ -199,9 +227,10 @@ export const Map = () => {
 
   const interactiveLayerIds = [
     ...useInteractiveLayers(),
-    'mask-buffer',
-    'mask-boundary',
-    'mask-boundary-bg',
+    // Mask layers removed - mask disabled per user request
+    // 'mask-buffer',
+    // 'mask-boundary',
+    // 'mask-boundary-bg',
   ]
 
   if (!mapParam) {
@@ -265,8 +294,10 @@ export const Map = () => {
       {/* Order: First Background Sources, then Vector Tile Sources */}
       <UpdateFeatureState />
       <SourcesLayerRasterBackgrounds />
-      <SourcesLayersRegionMask />
+      {/* Regional mask disabled - removed per user request */}
+      {/* <SourcesLayersRegionMask /> */}
       <SourcesLayersAtlasGeo />
+      <SourcesLayersBicycleAccidents />
       <SourcesLayersStaticDatasets />
       <Suspense>
         <SourcesLayersOsmNotes />

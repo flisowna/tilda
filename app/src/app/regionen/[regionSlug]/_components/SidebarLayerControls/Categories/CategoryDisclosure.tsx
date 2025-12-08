@@ -2,10 +2,13 @@ import { useCategoriesConfig } from '@/src/app/regionen/[regionSlug]/_hooks/useQ
 import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
 import { ChevronDownIcon, ChevronLeftIcon } from '@heroicons/react/20/solid'
 import { produce } from 'immer'
+import React from 'react'
 import { useMapActions } from '../../../_hooks/mapState/useMapState'
 import { MapDataCategoryConfig } from '../../../_hooks/useQueryState/useCategoriesConfig/type'
 import { SubcategoriesCheckbox } from '../Subcategories/SubcategoriesCheckbox'
 import { SubcategoriesDropdown } from '../Subcategories/SubcategoriesDropdown'
+import { BicycleAccidentsTimeFilter } from './BicycleAccidentsTimeFilter'
+import { BicycleAccidentsViewSelector } from './BicycleAccidentsViewSelector'
 import { CategoryHeadlineToggle } from './CategoryHeadlineToggle'
 
 type Props = { categoryConfig: MapDataCategoryConfig; active: boolean }
@@ -18,7 +21,22 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
     const newConfig = produce(categoriesConfig, (draft) => {
       const category = draft.find((th) => th.id === categoryId)
       if (category) {
+        const wasActive = category.active
         category.active = !category.active
+        
+        // When bicycle accidents category is first activated, activate all severity checkboxes
+        if (categoryId === 'bicycleAccidents' && !wasActive && category.active) {
+          const subcat = category.subcategories.find((sub) => sub.id === 'bicycleAccidents')
+          if (subcat) {
+            subcat.styles.forEach((style) => {
+              if (['fatal', 'serious', 'light'].includes(style.id)) {
+                style.active = true
+              } else if (style.id === 'heatmap') {
+                style.active = false
+              }
+            })
+          }
+        }
       }
     })
     void setCategoriesConfig(newConfig)
@@ -83,6 +101,12 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
                     subcategories={checkboxSubcategories}
                     disabled={!active}
                   />
+                </>
+              )}
+              {currCategoryConfig.id === 'bicycleAccidents' && active && (
+                <>
+                  <BicycleAccidentsViewSelector />
+                  <BicycleAccidentsTimeFilter />
                 </>
               )}
             </DisclosurePanel>

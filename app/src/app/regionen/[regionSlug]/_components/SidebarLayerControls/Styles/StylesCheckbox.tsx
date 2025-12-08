@@ -30,10 +30,20 @@ export const StylesCheckbox = ({ categoryId, subcatConfig, disabled }: Props) =>
         ?.subcategories.find((t) => t.id === subcatId)
 
       if (subcat) {
-        subcat.styles.forEach((s) => (s.active = false))
-        if (checked) {
+        // For bicycle accidents, allow multiple styles to be active simultaneously
+        // For other subcategories, only one style active at a time (original behavior)
+        if (subcat.id === 'bicycleAccidents') {
           const style = subcat.styles.find((s) => s.id === styleId)
-          style && (style.active = true)
+          if (style) {
+            style.active = checked
+          }
+        } else {
+          // Original behavior: only one style active at a time
+          subcat.styles.forEach((s) => (s.active = false))
+          if (checked) {
+            const style = subcat.styles.find((s) => s.id === styleId)
+            style && (style.active = true)
+          }
         }
       }
     })
@@ -42,24 +52,57 @@ export const StylesCheckbox = ({ categoryId, subcatConfig, disabled }: Props) =>
 
   if (!subcatConfig) return null
 
+  const isBicycleAccidents = subcatConfig.id === 'bicycleAccidents'
+  let currentView: 'standard' | 'heatmap' = 'standard'
+  let currentStyleConfigs = subcatConfig.styles
+  if (isBicycleAccidents) {
+    const bicycleAccidentsCategory = categoriesConfig?.find((cat) => cat.id === 'bicycleAccidents')
+    const bicycleSubcat = bicycleAccidentsCategory?.subcategories.find(
+      (sub) => sub.id === 'bicycleAccidents',
+    )
+    if (bicycleSubcat) {
+      currentStyleConfigs = bicycleSubcat.styles
+      currentView = bicycleSubcat.styles.find((s) => s.id === 'heatmap')?.active
+        ? 'heatmap'
+        : 'standard'
+    }
+  }
+
   return (
     <div>
-      {subcatConfig.styles.map((styleConfig) => {
+      {currentStyleConfigs.map((styleConfig) => {
         if (!styleConfig) return null
+
+        if (isBicycleAccidents) {
+          if (styleConfig.id === 'heatmap') {
+            return null
+          }
+          if (['fatal', 'serious', 'light'].includes(styleConfig.id) && currentView === 'heatmap') {
+            return null
+          }
+        }
+
         const key = createSubcatStyleKey(subcatConfig.id, styleConfig.id)
+        const legendColor = styleConfig.legends?.[0]?.style?.color
+        const showColorCoding =
+          isBicycleAccidents &&
+          currentView === 'standard' &&
+          legendColor &&
+          ['fatal', 'serious', 'light'].includes(styleConfig.id)
+
         return (
           <div key={key} className="flex items-start">
             <div className="flex h-5 items-center">
               <input
-                id={subcatConfig.id}
-                name={subcatConfig.id}
+                id={`${subcatConfig.id}-${styleConfig.id}`}
+                name={`${subcatConfig.id}-${styleConfig.id}`}
                 type="checkbox"
                 className={twJoin(
                   'h-4 w-4 rounded border-gray-300',
                   disabled ? 'text-gray-400' : 'text-yellow-500 focus:shadow-md focus:outline-none',
                 )}
                 disabled={disabled}
-                defaultChecked={styleConfig.active}
+                checked={styleConfig.active}
                 onChange={(event) =>
                   toggleActive({
                     event,
@@ -72,13 +115,21 @@ export const StylesCheckbox = ({ categoryId, subcatConfig, disabled }: Props) =>
 
             <div className="ml-2 mt-0.5 text-sm leading-4">
               <label
-                htmlFor={subcatConfig.id}
+                htmlFor={`${subcatConfig.id}-${styleConfig.id}`}
                 className={twJoin('font-medium', disabled ? 'text-gray-400' : 'text-gray-700')}
               >
-                {subcatConfig.name}
+                <span className="flex items-center gap-2">
+                  {showColorCoding && (
+                    <span
+                      className="h-3 w-3 rounded-full border border-gray-300"
+                      style={{ backgroundColor: legendColor }}
+                    />
+                  )}
+                  <span>{styleConfig.name || subcatConfig.name}</span>
+                </span>
               </label>
 
-              {styleConfig.active && (
+              {styleConfig.active && (!isBicycleAccidents || styleConfig.id === 'heatmap') && (
                 <Legend subcategoryId={subcatConfig.id} styleConfig={styleConfig} />
               )}
             </div>
